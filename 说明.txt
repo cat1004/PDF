@@ -1,0 +1,261 @@
+相关问题总结:
+
+证书:openssl 和keytool生成 
+
+JDK自带工具keytool生成ssl证书
+ 
+
+前言：
+因为公司项目客户要求使用HTTPS的方式来保证数据的安全，所以木有办法研究了下怎么生成ssl证书来使用https以保证数据安全。
+
+百度了不少资料，看到JAVA的JDK自带生成SSL证书的工具：keytool，外加看了同事的心得体会，自己总结了一下具体的使用方法和使用过程中发现的问题及解决办法。
+
+ 
+
+1:什么是HTTPS？
+HTTPS其实是有两部分组成：HTTP + SSL / TLS，
+
+也就是在HTTP上又加了一层处理加密信息的模块，并且会进行身份的验证。
+
+问题：
+
+Firebug和postman之类的浏览器调试工具，为什么获取到的是明文？
+
+解答：
+
+SSL是对传输的数据进行加密，针对的是传输过程的安全。 
+
+firebug之类的浏览器调试工具，
+
+因为他们得到的是客户端加密之前/解密之后的数据，因此是明文的。
+
+2:什么是自签名证书？
+就是自己生成的证书，并不是官方生成的证书。
+
+除非是很正式的项目，否则使用自己签发的证书即可，因为官方生成证书是要花钱滴。
+
+ 
+
+3:进入正题，使用JDK自带工具KeyTool 生成自签发证书！
+第一步：为服务器生成证书
+打开CMD命令行工具，cd到C盘根目录或者是jdk的bin目录下，如下：
+
+使用keytool命令生成证书：
+
+keytool 
+
+-genkey 
+
+-alias tomcat(别名) 
+
+-keypass 123456(别名密码) 
+
+-keyalg RSA(算法) 
+
+-keysize 1024(密钥长度) 
+
+-validity 365(有效期，天单位) 
+
+-keystore D:/keys/tomcat.keystore(指定生成证书的位置和证书名称) 
+
+-storepass 123456(获取keystore信息的密码)
+
+ 
+
+方便复制版：
+
+keytool -genkey -alias tomcat -keypass 123456 -keyalg RSA -keysize 1024 -validity 365 -keystore D:/keys/tomcat.keystore -storepass 123456
+
+
+点击回车即可在D:/keys/文件夹内生成名为：tomcat.keystore的文件。
+
+成功后无提示信息
+
+注意：
+
+①D:/keys/ 目录需要提前手动创建好，否则会生成失败
+
+②提示输入域名的时候不能输入IP地址
+
+ 
+
+问题①的错误信息如下：
+
+ 
+
+ 
+
+ 
+
+第二步：为客户端生成证书
+为浏览器生成证书，以便让服务器来验证它。
+
+为了能将证书顺利导入至IE和Firefox，证书格式应该是PKCS12，
+
+因此，使用如下命令生成：
+
+keytool 
+
+-genkey 
+
+-alias client 
+
+-keypass 123456
+
+-keyalg RSA 
+
+-storetype PKCS12 
+
+-keypass 123456 
+
+-storepass 123456 
+
+-keystore D:/keys/client.p12
+
+ 
+
+方便复制版：
+
+keytool -genkey -alias client1 -keypass 123456 -keyalg RSA -keysize 1024 -validity 365 -storetype PKCS12 -keystore D:/keys/client1.p12 -storepass 123456
+
+第二步余下操作步骤同第一步。
+第三步：让服务器信任客户端证书
+1
+
+由于不能直接将PKCS12格式的证书库导入，
+
+必须先把客户端证书导出为一个单独的CER文件，使用如下命令：
+
+keytool -export -alias client -keystore D:/keys/client.p12 -storetype PKCS12 -keypass 123456 -file D:/keys/client.cer
+
+注意：
+
+Keypass：指定CER文件的密码，但会被忽略，而要求重新输入
+
+2、
+
+将该文件导入到服务器的证书库，添加为一个信任证书：
+
+keytool -import -v -file D:/keys/client.cer -keystore D:/keys/tomcat.keystor
+
+e -storepass 123456
+
+
+完成之后通过list命令查看服务器的证书库，
+
+可以看到两个证书，一个是服务器证书，一个是受信任的客户端证书：
+
+keytool -list -v -keystore D:/keys/tomcat.keystore
+
+
+第四步：让客户端信任服务器证书
+1、
+
+由于是双向SSL认证，客户端也要验证服务器证书，
+
+因此，必须把服务器证书添加到浏览器的“受信任的根证书颁发机构”。
+
+由于不能直接将keystore格式的证书库导入，
+
+必须先把服务器证书导出为一个单独的CER文件，使用如下命令：
+
+keytool -keystore D:/keys/tomcat.keystore -export -alias tomcat6 -file D:/keys/server.cer
+
+2、
+
+双击server.cer文件，按照提示安装证书，
+
+将证书填入到“受信任的根证书颁发机构”。
+
+填入方法：
+
+打开浏览器   - 工具  -  internet选项-内容- 证书-把中级证书颁发机构里的www.localhost.com(该名称即时你前面生成证书时填写的名字与姓氏)证书导出来-再把导出来的证书导入  受信任的根颁发机构  就OK了。
+
+ 
+
+第五步：配置Tomcat服务器
+<Connector  port="8443"
+
+protocol="org.apache.coyote.http11.Http11NioProtocol" SSLEnabled="true"
+
+maxThreads="150"
+
+scheme="https"
+
+secure="true"
+
+clientAuth="true"
+
+sslProtocol="TLS"
+
+keystoreFile="D:/keys/tomcat.keystore"
+
+keystorePass="123456"
+
+truststoreFile="D:/keys/tomcat.keystore"
+
+truststorePass="123456" />
+
+ 
+
+属性说明：
+
+clientAuth:设置是否双向验证，默认为false，设置为true代表双向验证
+
+keystoreFile:服务器证书文件路径
+
+keystorePass:服务器证书密码
+
+truststoreFile:用来验证客户端证书的根证书，此例中就是服务器证书
+
+truststorePass:根证书密码
+
+ 
+
+注意：
+
+① 设置clientAuth属性为True时，需要手动导入客户端证书才能访问。
+
+② 要访问https请求 需要访问8443端口，访问http请求则访问Tomcat默认端口（你自己设置的端口，默认8080）即可。
+
+ 
+
+ 
+
+总结：
+经过以上五步，你使用HTTPS 端口为8443 进行访问的时候 就是经过SSL信息加密，不怕被截获了。
+
+通话的双方，必须是都拥有证书的端，才能进行会话，换句话说，就是只有安装了咱证书的客户端，才能与服务器通信。
+
+ 
+
+小贴士：
+
+强制 https 访问
+
+在 tomcat /conf/web.xml 中的 </welcome- file-list> 后面加上这
+
+<login-config>    
+<!-- Authorization setting for SSL -->    
+<auth-method>CLIENT-CERT</auth-method>    
+<realm-name>Client Cert Users-only Area</realm-name>    
+</login-config>    
+<security-constraint>    
+<!-- Authorization setting for SSL -->    
+<web-resource-collection >    
+<web-resource-name >SSL</web-resource-name>    
+<url-pattern>/*</url-pattern>    
+</web-resource-collection>    
+<user-data-constraint>    
+<transport-guarantee>CONFIDENTIAL</transport-guarantee>    
+</user-data-constraint>    
+</security-constraint> 
+ 
+
+完成以上步骤后，在浏览器中输入http的访问地址也会自动转换为https了。
+
+关于证书参考https://www.cnblogs.com/zhangzb/p/5200418.html
+
+详情请看代码
+
+temple文件中为需要的附件,也可以自己生成
