@@ -2,18 +2,17 @@
 有关PDF相关内容
 basis:基础pdf 生成文件
 引用jar为:
+
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
             <version>5.4.3</version>
         </dependency>
-  
         <dependency>
             <groupId>com.itextpdf.tool</groupId>
             <artifactId>xmlworker</artifactId>
             <version>5.5.11</version>
         </dependency>
-        
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext-asian</artifactId>
