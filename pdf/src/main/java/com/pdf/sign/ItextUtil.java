@@ -100,9 +100,7 @@ public class ItextUtil {
       result.close();
     } catch (Exception e) {
       e.printStackTrace();
-      outputStream.close();
-      inputStream.close();
-      result.close();
+
     }
   }
 

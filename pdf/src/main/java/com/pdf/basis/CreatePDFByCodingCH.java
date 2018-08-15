@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 public class CreatePDFByCodingCH {
 
-  private static final String DEST = "/HelloWorld_CN.pdf";
+  private static final String DEST = "/xfasdf.pdf";
 
   public static void main(String[] args) throws IOException, DocumentException {
 
