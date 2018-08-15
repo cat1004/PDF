@@ -17,8 +17,8 @@ basis:基础pdf 生成文件
             <groupId>com.itextpdf</groupId>
             <artifactId>itext-asian</artifactId>
             <version>5.2.0</version>
-
         </dependency>
+        
         以下是解决中文字体写入不进去问题,引入的包,如果用自带的字体库,不用引入
        <dependency>
             <groupId>org.bouncycastle</groupId>
