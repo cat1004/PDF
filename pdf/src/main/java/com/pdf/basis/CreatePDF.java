@@ -50,14 +50,10 @@ public class CreatePDF {
       // 关闭文档
       document.close();
       System.out.println("PDF文件生成成功，PDF文件名：" + file.getAbsolutePath());
+      out.close();
     } catch (Exception e) {
       System.out.println("PDF文件" + file.getAbsolutePath() + "生成失败！" + e);
       e.printStackTrace();
-    } 
-    if (out != null) {
-      // 关闭输出文件流
-      out.close();
     }
-    
   }
 }
