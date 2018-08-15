@@ -19,11 +19,23 @@ basis:基础pdf 生成文件
             <version>5.2.0</version>
         </dependency>
         
-        以下是解决中文字体写入不进去问题,引入的包,如果用自带的字体库,不用引入
-       <dependency>
+       
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.56</version>
+        </dependency>
+        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.49</version>
+            <version>1.56</version>
+        </dependency>
+		 以下是解决中文字体写入不进去问题,引入的包,如果用自带的字体库,不用引入
+		 iTextAsian
+		   <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext-asian</artifactId>
+            <version>5.2.0</version>
         </dependency>
         
 encryption:签名验证相关内容
@@ -47,4 +59,4 @@ PDF图片预览jar包:
 有以上两个请对应,引入.
 另外PdfGenertelImageMany.jar文件运行会有报错,但不影响使用.目前尚为解决.
         
-        
+       
