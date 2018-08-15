@@ -28,7 +28,7 @@
             <version>5.2.0</version>
 
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.49</version>
@@ -37,8 +37,21 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
             <version>1.49</version>
+        </dependency>-->
+        <!--另一个-->
+        <!-- https://mvnrepository.com/artifact/org.icepdf.os/icepdf-core -->
+        <dependency>
+            <groupId>org.icepdf.os</groupId>
+            <artifactId>icepdf-core</artifactId>
+            <version>6.2.2</version>
         </dependency>
-
+        <!--pdf文件转图片-->
+        <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.8</version>
+        </dependency>
     </dependencies>
 
 
